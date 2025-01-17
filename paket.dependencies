@@ -1,0 +1,11 @@
+source https://api.nuget.org/v3/index.json
+
+framework: net9
+
+storage: none
+
+nuget OxyPlot.Core framework: netstandard2
+nuget OxyPlot.SkiaSharp framework: netstandard2
+nuget SkiaSharp.HarfBuzz
+nuget SkiaSharp.Views.Blazor
+nuget HarfBuzzSharp.NativeAssets.WebAssembly

@@ -1,0 +1,107 @@
+﻿@page "/"
+@using OxyPlot
+@using OxyPlot.Axes
+@using OxyPlot.Series
+@using OxyPlot.SkiaSharp.Blazor
+@using System.Reflection
+@using global::SkiaSharp
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@if (_model != null)
+{
+    <PlotView Model=_model style="height: 30vh" />
+}
+else
+{
+    <div>Loading plot...</div>
+}
+
+<button class="btn btn-primary" @onclick="UpdatePlotModel">Update</button>
+
+@code{
+    readonly List<BarItem> _bars = new List<BarItem>();
+    PlotModel? _model;
+
+    private void UpdatePlotModel()
+    {
+        _bars.Clear();
+        var model = new PlotModel
+            {
+                Title = "Cake Type Popularity",
+                DefaultFont = "OpenSans"
+            };
+
+        var rand = new Random();
+        double[] cakePopularity = new double[5];
+        for (int i = 0; i < 5; ++i)
+        {
+            cakePopularity[i] = rand.NextDouble();
+        }
+        var sum = cakePopularity.Sum();
+        for (int i = 0; i < 5; ++i)
+        {
+            _bars.Add(new BarItem { Value = (cakePopularity[i] / sum * 100) });
+        }
+        var barSeries = new BarSeries
+            {
+                XAxisKey = "Value",
+                YAxisKey = "CakeAxis",
+                ItemsSource = _bars,
+                LabelPlacement = LabelPlacement.Inside,
+                LabelFormatString = "{0:.00}%",
+                TrackerFormatString = "Hello\n0={0}\r{1}\r\n{2}",
+                //TrackerKey = "x",
+            };
+        model.Series.Add(barSeries);
+        model.Axes.Add(new LinearAxis
+            {
+                Key = "Value",
+                Position = AxisPosition.Left,
+                MajorGridlineStyle = LineStyle.Automatic,
+                Minimum = 0,
+                Maximum = 100,
+            });
+        model.Axes.Add(new CategoryAxis
+            {
+                Position = AxisPosition.Bottom,
+                Key = "CakeAxis", Angle = 50,
+                ItemsSource = new[] {
+                    "Apple cake",
+                    "Baumkuchen",
+                    "Bundt Cake",
+                    "Chocolate cake",
+                    "Carrot cake"
+                }
+            });
+
+        _model = model;
+        StateHasChanged();
+    }
+
+    public static Stream? GetTypeface(string fullFontName)
+    {
+        SKTypeface result;
+
+        var info = Assembly.GetExecutingAssembly().GetName();
+        var name = info.Name;
+        var stream = Assembly
+            .GetExecutingAssembly()
+            .GetManifestResourceStream($"{name}.Resources.OpenSans-Regular.ttf")!;
+        return stream;
+    }
+
+    protected override void OnInitialized()
+    {
+        //var tf = GetTypeface("OpenSans");
+        //SKFontManager.Default.CreateTypeface(tf);
+        //tf.Dispose();
+        UpdatePlotModel();
+
+        base.OnInitialized();
+    }
+}

@@ -1,0 +1,84 @@
+﻿@page "/line"
+@using OxyPlot
+@using OxyPlot.Axes
+@using OxyPlot.Legends
+@using OxyPlot.Series
+@using OxyPlot.SkiaSharp.Blazor
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@if (_model != null)
+{
+    <PlotView Model=_model style="height: 30vh" />
+}
+else
+{
+    <div>Loading plot...</div>
+}
+
+<button class="btn btn-primary" @onclick="UpdatePlotModel">Update</button>
+
+@code{
+    PlotModel? _model;
+
+    private void UpdatePlotModel()
+    {
+        var model = new PlotModel
+            {
+                Title = "Ups and downs",
+                DefaultFont = "Helvetica"
+            };
+        var legend = new Legend
+            {
+                LegendBackground = OxyColor.FromArgb(200, 255, 255, 255),
+                LegendBorder = OxyColors.Black,
+                LegendPlacement = LegendPlacement.Outside,  
+            };
+        model.Legends.Add(legend);
+
+        var rand = new Random();
+        for (int s = 0; s < 7; ++s)
+        {
+            var date = DateTime.Now.Date;
+            var data = new DataPoint[48];
+            for (int i = 0; i < 48; ++i)
+            {
+                var t = date.AddMinutes(i * 15);
+                var d = rand.Next(i * 50, i * 100);
+                data[i] = new DataPoint(Axis.ToDouble(t), d);
+            }
+            var series = new LineSeries
+                {
+                    Title = "Data #" + s.ToString(),
+                    ItemsSource = data,
+                };
+            model.Series.Add(series);
+        }
+        model.Axes.Add(new LinearAxis
+            {
+                Title = "Data",
+                Position = AxisPosition.Left,
+                MajorGridlineStyle = LineStyle.Automatic,
+            });
+        model.Axes.Add(new DateTimeAxis
+            {
+                Title = "Time",
+                Position = AxisPosition.Bottom,
+                Angle = 50
+            });
+
+        _model = model;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        UpdatePlotModel();
+
+        base.OnInitialized();
+    }
+}
